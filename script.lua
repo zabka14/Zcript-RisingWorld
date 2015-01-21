@@ -191,16 +191,13 @@ function kill(admin, player)
 end
 
 function tp(admin, player)
-    admin:sendTextMessage("Test ?");
     local targetPos = player:getPlayerPosition();
-    admin:sendTextMessage(admin:getPlayerPosition());  --return (x, y, z), vector kind of object
     local newPosx = targetPos.x + 10.0;
     local newPosy = targetPos.y + 10.0;
     local newPosz = targetPos.z + 10.0;
     -- it seems that admin:setPlayerPosition(targetPos.x +1.0, targetPos.y +1.0, targetPos.z + 1.0) doesn't work ...
     -- so I try to add +10 to x y and z before calling the function
     admin:setPlayerPosition(newPosx, newPosy, newPosz); 
-    admin:sendTextMessage(admin:getPlayerPosition()) -- return (x+10, y+10, z+10) but character didn't move ... 
 end
 
 function decoratePlayerName(player)
