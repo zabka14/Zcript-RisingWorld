@@ -74,6 +74,7 @@ function onPlayerCommand(event)
                 event.player:sendTextMessage("[#00FFCC]/kill2 [#00CC88]<player>");
                 event.player:sendTextMessage("[#00FFCC]/tp [#00CC88] <ID>");
                 event.player:sendTextMessage("[#00FFCC]/tp2 [#00CC88] <player>");
+                event.player:sendTextMessage("[#00FFCC]/kick <player ID> <reason>");
             end
             event.player:sendTextMessage("[#00FFCC]/last [#00CC88][player]");
             event.player:sendTextMessage("[#00FFCC]/whisper [#00CC88]<player> <message>");
@@ -83,7 +84,14 @@ function onPlayerCommand(event)
 
 
 
-
+        elseif cmd[1] == "/kick" then
+            -- Checking if admin :
+            if not event.player:isAdmin() then return msgAccessDenied(event.player) end
+            -- Checking if there's a player, don't check for reason
+            if not cmd[2] then return msgInvalidUsage(event.player) end
+            -- Call the kick function
+            local target = server:findPlayerByID(cmd[2]);
+            kickPlayer(event.player, target, cmd[3]);
 
 
         elseif cmd[1] == "/kill2" then
@@ -175,6 +183,17 @@ function onPlayerCommand(event)
         end
     end
 end
+
+
+
+function kickPlayer(kicker, target, reason)
+    local tName = target:getPlayerName()
+    target:kick(reason)
+    kicker:sendTextMessage("You kicked "..tName.." !")
+end
+
+
+
 
 function sendTableMessage(opts)
     for i=1,#opts.messages do
