@@ -272,11 +272,11 @@ end
 
 function tp(admin, player)
     local targetPos = player:getPlayerPosition();
-    local newPosx = targetPos.x + 10.0;
-    local newPosy = targetPos.y + 10.0;
-    local newPosz = targetPos.z + 10.0;
+    local newPosx = targetPos.x + 1.0;
+    local newPosy = targetPos.y + 1.0;
+    local newPosz = targetPos.z + 1.0;
     -- it seems that admin:setPlayerPosition(targetPos.x +1.0, targetPos.y +1.0, targetPos.z + 1.0) doesn't work ...
-    -- so I try to add +10 to x y and z before calling the function
+    -- so I try to add +1.0 to x y and z before calling the function
     admin:setPlayerPosition(newPosx, newPosy, newPosz); 
 end
 
