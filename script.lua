@@ -117,8 +117,16 @@ function onPlayerCommand(event)
             ----------------------------
             --     Group Management   --
             ----------------------------
+        elseif cmd[1] == "/gkick" then
 
 
+        elseif cmd[1] == "/gadd" then
+
+
+        elseif cmd[1] == "/g" then
+
+
+        elseif cmd[1] == "/gsetAdmin" then    
 
 
             ----------------------------
