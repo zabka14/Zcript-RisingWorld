@@ -139,17 +139,25 @@ function onPlayerCommand(event)
             -- Checking if targeted player exist
             tp(event.player, target)
         
-        -- TO DO 
+
         -- TP player -> player (or admin)
         elseif cmd[1] == "/tp2" then
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
             -- Checking if there's an argument
             if not cmd[2] then return msgInvalidUsage(event.player) end
+            -- Checking if arg is a player ID OR a player name
+            if tonumber(cmd[2]) ~= nil then
+                -- here if cmd2's a number
+                -- Checking if targeted player exist
+                 if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                local target = server:findPlayerByID(cmd[2]);
+            else
+                -- Checking if targeted player exist
+                if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                local target = server:findPlayerByName(cmd[2]);
             -- Checking if targeted player exist
-            if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
-            local target = server:findPlayerByName(cmd[2]);
-            tp(event.player, target)
+            tp(target, event.player)
 
 
         elseif cmd[1] == "/pos" then
