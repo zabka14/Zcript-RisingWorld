@@ -7,7 +7,7 @@
            |   |                                             |    |
            |   |https://github.com/zabka14/Zcript-RisingWorld|    |
            |   |                                             |    |
-           |   |                                             |    |
+           |   |     SPECIAL VERSION for LaTrouTe            |    |
            |   |                                             |    |
            |   |     Based on :   H0tstuff                   |    |
            |   |     By       :   H0tw1r3                    |    |           
