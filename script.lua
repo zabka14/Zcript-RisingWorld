@@ -5,6 +5,12 @@
 -- Copyright (c) 2014, Jeffrey Clark. This file is licensed under the
 -- Affero General Public License version 3 or later. See the COPYRIGHT file.
 
+
+-- This version was spacially desgined for LaTrouTe, admin of a Quebec/French server
+-- The modifications made on this version might be included to the master branch
+-- Please, don't hesitate to request the incorporation of new modifications if you find them usefull
+
+
 include("support.lua")
 
 database = getDatabase()
@@ -72,8 +78,8 @@ function onPlayerCommand(event)
                 -- Zcript added functions :
                 event.player:sendTextMessage("[#00FFCC]/kill [#00CC88] <ID>");
                 event.player:sendTextMessage("[#00FFCC]/kill2 [#00CC88]<player>");
-                event.player:sendTextMessage("[#00FFCC]/tp [#00CC88] <ID>");
-                event.player:sendTextMessage("[#00FFCC]/tp2 [#00CC88] <player>");
+                event.player:sendTextMessage("[#00FFCC]/tp [#00CC88] <ID OR player name>"); -- This function teleport an admin to a player
+                event.player:sendTextMessage("[#00FFCC]/tp2 [#00CC88] <ID OR player name>"); -- This function teleport a player to an admin
                 event.player:sendTextMessage("[#00FFCC]/kick <player ID> <reason>");
             end
             event.player:sendTextMessage("[#00FFCC]/last [#00CC88][player]");
@@ -112,7 +118,8 @@ function onPlayerCommand(event)
             if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
             local target = server:findPlayerByID(cmd[2]);
             kill(event.player, target)
-
+        
+        -- TP admin -> player 
         elseif cmd[1] == "/tp" then
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
@@ -122,7 +129,8 @@ function onPlayerCommand(event)
             if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
             local target = server:findPlayerByID(cmd[2]);
             tp(event.player, target)
-
+        
+        -- TP player -> player (or admin)
         elseif cmd[1] == "/tp2" then
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
