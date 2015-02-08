@@ -48,11 +48,12 @@ function onPlayerCommand(event)
                 event.player:sendTextMessage("[#00FFCC]/setWelcome [#00CC88]<message>");
                 event.player:sendTextMessage("[#00FFCC]/setMotd [#00CC88]<message>");
                 event.player:sendTextMessage("[#00FFCC]/yell [#00CC88]<message>");
-                event.player:sendTextMessage("[#00FFCC]/kill [#00CC88] <ID >");
-                event.player:sendTextMessage("[#00FFCC]/kill2 [#00CC88]<player>");
+                event.player:sendTextMessage("[#00FFCC]/kill [#00CC88] <player ID> OR <player name>");
                 event.player:sendTextMessage("[#00FFCC]/tp [#00CC88] <ID> OR <player name>");
                 event.player:sendTextMessage("[#00FFCC]/tp2 [#00CC88] <ID> OR <player name>");
                 event.player:sendTextMessage("[#00FFCC]/kick [#00CC88] <player ID> <reason>");
+                event.player.sendTextMessage("[#00FFCC]/heal [#00CC88] <player ID or name>");
+
             else
                 event.player:sendTextMessage("[#00FFCC]You're not an admin !");
             end
@@ -94,33 +95,64 @@ function onPlayerCommand(event)
             --       For Admin        --
             ----------------------------
 
-        elseif cmd[1] == "/kick" then
+        elseif cmd[1] == "/heal" then
+            local target;
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
-            -- Checking if there's a player, don't check for reason
+            -- Checking if there's an argument
             if not cmd[2] then return msgInvalidUsage(event.player) end
-            -- Call the kick function
-            local target = server:findPlayerByID(cmd[2]);
+            -- Checking if arg is a player ID OR a player name
+            if tonumber(cmd[2]) == nil then
+                -- here if cmd2's not a number
+                -- Checking if targeted player exist
+                 if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByName(cmd[2]);
+            else
+                -- Checking if targeted player exist
+                if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByID(cmd[2]);
+            end
+            heal(target);
+
+
+        elseif cmd[1] == "/kick" then
+            local target;
+            -- Checking if admin :
+            if not event.player:isAdmin() then return msgAccessDenied(event.player) end
+            -- Checking if there's an argument
+            if not cmd[2] then return msgInvalidUsage(event.player) end
+            -- Checking if arg is a player ID OR a player name
+            if tonumber(cmd[2]) == nil then
+                -- here if cmd2's not a number
+                -- Checking if targeted player exist
+                 if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByName(cmd[2]);
+            else
+                -- Checking if targeted player exist
+                if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByID(cmd[2]);
+            end
             kickPlayer(event.player, target, cmd[3]);
 
 
-        elseif cmd[1] == "/kill2" then
-            -- Checking if admin :
-            if not event.player:isAdmin() then return msgAccessDenied(event.player) end
-            -- Checking if there's an argument
-            if not cmd[2] then return msgInvalidUsage(event.player) end
-            -- Checking if targeted player exist
-            if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
-            local target = server:findPlayerByName(cmd[2]);
-            kill(event.player, target)
 
         elseif cmd[1] == "/kill" then
+            local target;
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
             -- Checking if there's an argument
             if not cmd[2] then return msgInvalidUsage(event.player) end
-            if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
-            local target = server:findPlayerByID(cmd[2]);
+            -- Checking if arg is a player ID OR a player name
+            if tonumber(cmd[2]) == nil then
+                -- here if cmd2's not a number
+                -- Checking if targeted player exist
+                 if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByName(cmd[2]);
+            else
+                -- Checking if targeted player exist
+                if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByID(cmd[2]);
+            end
             kill(event.player, target)
 
         -- TP admin -> player 
@@ -243,6 +275,12 @@ function kickPlayer(kicker, target, reason)
 end
 
 
+-- Suggested by username on official forum ! 
+function heal(target)
+    local tName = target:getPlayerName()
+    target.setPlayerHealth(100);
+    target:sendTextMessage("You've been healed !")
+end
 
 
 function sendTableMessage(opts)
