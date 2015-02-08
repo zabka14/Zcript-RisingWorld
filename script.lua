@@ -95,6 +95,11 @@ function onPlayerCommand(event)
             --       For Admin        --
             ----------------------------
 
+
+        elseif cmd[1] == "/test" then
+             event.player:sendTextMessage(event.player:getPlayerID());
+
+
         elseif cmd[1] == "/heal" then
             local target;
             -- Checking if admin :
@@ -475,6 +480,28 @@ function lastlog(opts)
     database:queryupdate(query)
 end
 
+
+            ---------------------------------------------------------------------
+            --                Group management and DB stuff                    --
+            ---------------------------------------------------------------------
+
+-- function isInDB(player)
+--     local id = player.getPlayerDBID();
+--     local name = player.getPlayerName();
+--     query = "SELECT name IN player WHERE ID ="..id.." ORDER BY name DESC LIMIT 1;";
+--     print(timePrefix{text=query})
+--     database:queryupdate(query);
+--     if 
+
+
+
+
+
+
+
+
+
+
             ---------------------------------------------------------------------
             --                         Event Handler                           --
             ---------------------------------------------------------------------
@@ -494,9 +521,10 @@ function onPlayerConnect(event)
     lastlog{action='connect', po=event.player:getPlayerName()}
 
     -- broadcastPlayerStatus(event.player, " is connecting")
-    
-    -- I should be able to set value to event.player, but banning myself is throwing errors so no way to really test :(
-    --- need a second account to really test this stuff.
+
+--    if !(isInDB(event.player)) then
+
+
 end
 
 function onPlayerDisconnect(event)
@@ -548,9 +576,9 @@ function onEnable()
 
 
     -- Group management DB entry
-    database:queryupdate("CREATE TABLE IF NOT EXISTS `player` (`ID` INTEGER PRIMARY KEY NOT NULL, `name` VARCHAR NOT NULL, `groupID` INTEGER);");
-    database:queryupdate("CREATE TABLE IF NOT EXISTS `group` (`ID` INTEGER PRIMARY KEY NOT NULL, `name` VARCHAR NOT NULL, `adminID` INTEGER NOT NULL);");
-    database:queryupdate("CREATE TABLE IF NOT EXISTS `groupAdmin` (`ID` INTEGER PRIMARY KEY NOT NULL, `admin1` INTEGER, `admin2` INTEGER, `admin3` INTEGER);");
+    database:queryupdate("CREATE TABLE IF NOT EXISTS player (ID INTEGER PRIMARY KEY NOT NULL, name VARCHAR NOT NULL, groupID INTEGER);");
+    database:queryupdate("CREATE TABLE IF NOT EXISTS group (ID INTEGER PRIMARY KEY NOT NULL, name VARCHAR NOT NULL, adminID INTEGER NOT NULL);");
+    database:queryupdate("CREATE TABLE IF NOT EXISTS groupAdmin (ID INTEGER PRIMARY KEY NOT NULL, admin1 INTEGER, admin2 INTEGER, admin3 INTEGER);");
 
 
     -- Cleanup lost connections (server crash)
