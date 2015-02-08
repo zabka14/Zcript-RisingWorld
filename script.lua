@@ -454,7 +454,9 @@ end
 function onPlayerConnect(event)
     playersOnline[string.lower(event.player:getPlayerName())] = { id=event.player:getPlayerID(), name=event.player:getPlayerName(), ip=event.player:getPlayerIP(), dbid=event.player:getPlayerDBID() }
     lastlog{action='connect', po=event.player:getPlayerName()}
-    broadcastPlayerStatus(event.player, " is connecting")
+
+    -- broadcastPlayerStatus(event.player, " is connecting")
+    
     -- I should be able to set value to event.player, but banning myself is throwing errors so no way to really test :(
     --- need a second account to really test this stuff.
 end
