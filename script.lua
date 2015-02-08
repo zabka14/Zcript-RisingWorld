@@ -7,6 +7,7 @@
 
 include("support.lua")
 
+
 database = getDatabase()
 server = getServer()
 motd = { time=0, message=nil }
@@ -23,45 +24,6 @@ yellLabel:setBorderThickness(4);
 yellLabel:setFontsize(30);
 yellLabel:setPivot(4);
 
-
-
-            ---------------------------------------------------------------------
-            --                         Event Handler                           --
-            ---------------------------------------------------------------------
-
-
-function onPlayerSpawn(event)
-    event.player:addGuiElement(yellLabel)
-    broadcastPlayerStatus(event.player, " joined the world")
-    showWelcome(event.player);
-    -- check for players that were offline when banned
-    checkban(event.player)
-    event.player:sendTextMessage("[#00FFCC]This server is using Zcript ");
-end
-
-function onPlayerConnect(event)
-    playersOnline[string.lower(event.player:getPlayerName())] = { id=event.player:getPlayerID(), name=event.player:getPlayerName(), ip=event.player:getPlayerIP(), dbid=event.player:getPlayerDBID() }
-    lastlog{action='connect', po=event.player:getPlayerName()}
-    broadcastPlayerStatus(event.player, " is connecting")
-    -- I should be able to set value to event.player, but banning myself is throwing errors so no way to really test :(
-    --- need a second account to really test this stuff.
-end
-
-function onPlayerDisconnect(event)
-    lastlog{action='disconnect', po=event.player:getPlayerName()}
-    -- TODO: compact the table
-    playersOnline[string.lower(event.player:getPlayerName())] = nil
-    broadcastPlayerStatus(event.player, " disconnected")
-end
-
-function onPlayerDeath(event)
-    broadcastPlayerStatus(event.player, " is dead")
-end
-
-function onPlayerText(event)
-    event.prefix = timePrefix{text=decoratePlayerName(event.player)}
-    print(timePrefix{text=event.player:getPlayerName()..": " .. event.text})
-end
 
 function onPlayerCommand(event)
     print(timePrefix{text=event.player:getPlayerName() .. ": "..event.command})
@@ -86,7 +48,7 @@ function onPlayerCommand(event)
                 event.player:sendTextMessage("[#00FFCC]/setWelcome [#00CC88]<message>");
                 event.player:sendTextMessage("[#00FFCC]/setMotd [#00CC88]<message>");
                 event.player:sendTextMessage("[#00FFCC]/yell [#00CC88]<message>");
-                event.player:sendTextMessage("[#00FFCC]/kill [#00CC88] <ID>");
+                event.player:sendTextMessage("[#00FFCC]/kill [#00CC88] <ID >");
                 event.player:sendTextMessage("[#00FFCC]/kill2 [#00CC88]<player>");
                 event.player:sendTextMessage("[#00FFCC]/tp [#00CC88] <ID> OR <player name>");
                 event.player:sendTextMessage("[#00FFCC]/tp2 [#00CC88] <ID> OR <player name>");
@@ -163,40 +125,42 @@ function onPlayerCommand(event)
 
         -- TP admin -> player 
         elseif cmd[1] == "/tp" then
+            local target;
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
             -- Checking if there's an argument
             if not cmd[2] then return msgInvalidUsage(event.player) end
             -- Checking if arg is a player ID OR a player name
-            if tonumber(cmd[2]) ~= nil then
-                -- here if cmd2's a number
+            if tonumber(cmd[2]) == nil then
+                -- here if cmd2's not a number
                 -- Checking if targeted player exist
-                 if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
-                local target = server:findPlayerByID(cmd[2]);
+                 if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByName(cmd[2]);
             else
                 -- Checking if targeted player exist
-                if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
-                local target = server:findPlayerByName(cmd[2]);
+                if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByID(cmd[2]);
             end
             tp(event.player, target)
         
 
         -- TP player -> admin
         elseif cmd[1] == "/tp2" then
+            local target;
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
             -- Checking if there's an argument
             if not cmd[2] then return msgInvalidUsage(event.player) end
             -- Checking if arg is a player ID OR a player name
-            if tonumber(cmd[2]) ~= nil then
-                -- here if cmd2's a number
+            if tonumber(cmd[2]) == nil then
+                -- here if cmd2's not a number
                 -- Checking if targeted player exist
-                 if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
-                local target = server:findPlayerByID(cmd[2]);
+                 if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByName(cmd[2]);
             else
                 -- Checking if targeted player exist
-                if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
-                local target = server:findPlayerByName(cmd[2]);
+                if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByID(cmd[2]);
             end
             tp(target, event.player)
 
@@ -266,9 +230,6 @@ function onPlayerCommand(event)
         end
     end
 end
-
-
-
             ---------------------------------------------------------------------
             --           Effective command called by previous part             --
             ---------------------------------------------------------------------
@@ -307,17 +268,6 @@ function tp(admin, player)
     -- so I try to add +1.0 to x y and z before calling the function
     admin:setPlayerPosition(newPosx, newPosy, newPosz); 
 end
-
-function tp(admin, player)
-    local targetPos = player:getPlayerPosition();
-    local newPosx = targetPos.x + 1.0;
-    local newPosy = targetPos.y + 1.0;
-    local newPosz = targetPos.z + 1.0;
-    -- it seems that admin:setPlayerPosition(targetPos.x +1.0, targetPos.y +1.0, targetPos.z + 1.0) doesn't work ...
-    -- so I try to add +1.0 to x y and z before calling the function
-    admin:setPlayerPosition(newPosx, newPosy, newPosz); 
-end
-
 
 
 function decoratePlayerName(player)
@@ -486,6 +436,45 @@ function lastlog(opts)
     print(timePrefix{text=query})
     database:queryupdate(query)
 end
+
+            ---------------------------------------------------------------------
+            --                         Event Handler                           --
+            ---------------------------------------------------------------------
+
+
+function onPlayerSpawn(event)
+    event.player:addGuiElement(yellLabel)
+    broadcastPlayerStatus(event.player, " joined the world")
+    showWelcome(event.player);
+    -- check for players that were offline when banned
+    checkban(event.player)
+    event.player:sendTextMessage("[#00FFCC]This server is using Zcript ");
+end
+
+function onPlayerConnect(event)
+    playersOnline[string.lower(event.player:getPlayerName())] = { id=event.player:getPlayerID(), name=event.player:getPlayerName(), ip=event.player:getPlayerIP(), dbid=event.player:getPlayerDBID() }
+    lastlog{action='connect', po=event.player:getPlayerName()}
+    broadcastPlayerStatus(event.player, " is connecting")
+    -- I should be able to set value to event.player, but banning myself is throwing errors so no way to really test :(
+    --- need a second account to really test this stuff.
+end
+
+function onPlayerDisconnect(event)
+    lastlog{action='disconnect', po=event.player:getPlayerName()}
+    -- TODO: compact the table
+    playersOnline[string.lower(event.player:getPlayerName())] = nil
+    broadcastPlayerStatus(event.player, " disconnected")
+end
+
+function onPlayerDeath(event)
+    broadcastPlayerStatus(event.player, " is dead")
+end
+
+function onPlayerText(event)
+    event.prefix = timePrefix{text=decoratePlayerName(event.player)}
+    print(timePrefix{text=event.player:getPlayerName()..": " .. event.text})
+end
+
 
 
 
