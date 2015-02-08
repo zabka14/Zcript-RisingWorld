@@ -279,8 +279,6 @@ end
 function heal(target)
     local tName = target:getPlayerName()
     target.setPlayerHealth(100);
-    target.setPlayerHunger(100); -- not sure ?
-    target.setPlayerThirst(100); -- not sure ?
     target:sendTextMessage("You've been healed !")
 end
 
