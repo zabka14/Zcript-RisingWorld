@@ -487,13 +487,34 @@ end
             --                Group management and DB stuff                    --
             ---------------------------------------------------------------------
 
--- function isInDB(player)
---     local id = player.getPlayerDBID();
---     local name = player.getPlayerName();
---     query = "SELECT name IN player WHERE ID ="..id.." ORDER BY name DESC LIMIT 1;";
---     print(timePrefix{text=query})
---     database:queryupdate(query);
---     if 
+function isInDB(player)
+    local id = player.getPlayerDBID();
+    local name = player.getPlayerName();
+    query = "SELECT name IN player WHERE ID ="..id.." ORDER BY name DESC LIMIT 1;";
+    print(timePrefix{text=query})
+    if !(name==database:queryupdate(query))
+        then return 0;
+    else
+        return 1;
+    end
+end
+
+function addToDB(player)
+    local id = player.getPlayerDBID();
+    local name = player.getPlayerName();
+    query = "INSERT INTO player (ID, name) VALUES ("..id..","..name..");";
+    print(timePrefix{text=query})
+    database:queryupdate(query)        
+end
+
+function removeFromDB(player)
+    local id = player.getPlayerDBID();
+    local name = player.getPlayerName();
+    query = "DELETE FROM player WHERE ID ="..id.." AND name="..name.." COLLATE NOCASE;"
+    print(timePrefix{text=query})
+    database:queryupdate(query)
+end
+
 
 
 
@@ -516,6 +537,10 @@ function onPlayerSpawn(event)
     -- check for players that were offline when banned
     checkban(event.player)
     event.player:sendTextMessage("[#00FFCC]This server is using Zcript ");
+    if !(addToDB(event.player)==1)
+        then
+            addToDB(event.player);
+    end                
 end
 
 function onPlayerConnect(event)
