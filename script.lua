@@ -283,9 +283,9 @@ end
 -- Suggested by username on official forum ! 
 function heal(target)
     local tName = target:getPlayerName()
-    target.setPlayerHealth(100);
-    target.setPlayerHunger(100);
-    target.setPlayerThirst(100);
+    target:setPlayerHealth(100);
+    target:setPlayerHunger(100);
+    target:setPlayerThirst(100);
     target:sendTextMessage("You've been healed !")
 end
 
@@ -487,33 +487,33 @@ end
             --                Group management and DB stuff                    --
             ---------------------------------------------------------------------
 
-function isInDB(player)
-    local id = player.getPlayerDBID();
-    local name = player.getPlayerName();
-    query = "SELECT name IN player WHERE ID ="..id.." ORDER BY name DESC LIMIT 1;";
-    print(timePrefix{text=query})
-    if !(name==database:queryupdate(query))
-        then return 0;
-    else
-        return 1;
-    end
-end
+-- function isInDB(player)
+--     local id = player.getPlayerDBID();
+--     local name = player.getPlayerName();
+--     query = "SELECT name IN player WHERE ID ="..id.." ORDER BY name DESC LIMIT 1;";
+--     print(timePrefix{text=query})
+--     if name==database:queryupdate(query)
+--         then return 1;
+--     else
+--         return 0;
+--     end
+-- end
 
-function addToDB(player)
-    local id = player.getPlayerDBID();
-    local name = player.getPlayerName();
-    query = "INSERT INTO player (ID, name) VALUES ("..id..","..name..");";
-    print(timePrefix{text=query})
-    database:queryupdate(query)        
-end
+-- function addToDB(player)
+--     local id = player.getPlayerDBID();
+--     local name = player.getPlayerName();
+--     query = "INSERT INTO player (ID, name) VALUES ("..id..","..name..");";
+--     print(timePrefix{text=query})
+--     database:queryupdate(query)        
+-- end
 
-function removeFromDB(player)
-    local id = player.getPlayerDBID();
-    local name = player.getPlayerName();
-    query = "DELETE FROM player WHERE ID ="..id.." AND name="..name.." COLLATE NOCASE;"
-    print(timePrefix{text=query})
-    database:queryupdate(query)
-end
+-- function removeFromDB(player)
+--     local id = player.getPlayerDBID();
+--     local name = player.getPlayerName();
+--     query = "DELETE FROM player WHERE ID ="..id.." AND name="..name.." COLLATE NOCASE;"
+--     print(timePrefix{text=query})
+--     database:queryupdate(query)
+-- end
 
 
 
@@ -537,10 +537,7 @@ function onPlayerSpawn(event)
     -- check for players that were offline when banned
     checkban(event.player)
     event.player:sendTextMessage("[#00FFCC]This server is using Zcript ");
-    if !(addToDB(event.player)==1)
-        then
-            addToDB(event.player);
-    end                
+             
 end
 
 function onPlayerConnect(event)
@@ -548,8 +545,11 @@ function onPlayerConnect(event)
     lastlog{action='connect', po=event.player:getPlayerName()}
 
     -- broadcastPlayerStatus(event.player, " is connecting")
+    -- if !(addToDB(event.player)==1)
+    --     then
+    --         addToDB(event.player);
+    -- end   
 
---    if !(isInDB(event.player)) then
 
 
 end
