@@ -52,7 +52,7 @@ function onPlayerCommand(event)
                 event.player:sendTextMessage("[#00FFCC]/tp [#00CC88] <ID> OR <player name>");
                 event.player:sendTextMessage("[#00FFCC]/tp2 [#00CC88] <ID> OR <player name>");
                 event.player:sendTextMessage("[#00FFCC]/kick [#00CC88] <player ID> <reason>");
-                event.player.sendTextMessage("[#00FFCC]/heal [#00CC88] <player ID or name>");
+                event.player:sendTextMessage("[#00FFCC]/heal [#00CC88] <player ID or name>");
 
             else
                 event.player:sendTextMessage("[#00FFCC]You're not an admin !");
