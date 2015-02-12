@@ -65,21 +65,16 @@ Arguments for the function are noted into <>.
 /yell OR /y <message>   EXEMPLE /yell This Script is Amazing !
   Allow an admin to say something that will be displayed on all connected player screen.
 
-/kill  <ID>   EXEMPLE /kill 12
-  Allow an admin to kill a player with his ID. The ID is the one displayed when showing the score board.
-  I've added this to help admin, some times, player have very long and/or complicated name to write, so the ID's a good idea. 
+/kill2  <player name OR player ID>    EXEMPLE /kill2 Zabka OR /kill 12
+  Allow an admin to kill a player with his name or his ID. The name or the ID is the one displayed when showing the score board.
 
-/kill2  <player>    EXEMPLE /kill2 Zabka
-  Allow an admin to kill a player with his name. The name is the one displayed when showing the score board.
-
-/tp <ID>    EXEMPLE /tp h0tw1r3
-  Allow an admin to teleport himself on the location of the ID associated to the ID. The ID is the one displayed when showing the score board.
-  I've added this to help admin, some times, player have very long and/or complicated name to write, so the ID's a good idea.
+/tp <player ID or player name>    EXEMPLE /tp h0tw1r3
+  Allow an admin to teleport himself on the location of the player associated to the ID or name. The name or ID is the one displayed when showing the score board.
   /!\ The admin won't be teleported exactly on the same position that the player, but with an offset of (1.1.1) ! You might fall of the map !
 
-/tp2 <player>   EXEMPLE /tp2 h0tw1r3
-  Allow an admin to teleport himself on the location of the nale associated to the ID. The name is the one displayed when showing the score board.
-  /!\ The admin won't be teleported exactly on the same position that the player, but with an offset of (1.1.1) ! You might fall of the map !
+/tp2 <palyer ID or player name>   EXEMPLE /tp2 h0tw1r3
+  Allow an admin to teleport a player on his location location. The name or the ID is the one displayed when showing the score board.
+ 
 
 /last [player] EXEMPLE /last
   This command require no parameters. This will return the name of the last logged in player.

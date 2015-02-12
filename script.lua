@@ -7,6 +7,7 @@
 
 include("support.lua")
 
+
 database = getDatabase()
 server = getServer()
 motd = { time=0, message=nil }
@@ -24,44 +25,6 @@ yellLabel:setFontsize(30);
 yellLabel:setPivot(4);
 
 
-
-            ---------------------------------------------------------------------
-            --                         Event Handler                           --
-            ---------------------------------------------------------------------
-
-
-function onPlayerSpawn(event)
-    event.player:addGuiElement(yellLabel)
-    broadcastPlayerStatus(event.player, " joined the world")
-    showWelcome(event.player);
-    -- check for players that were offline when banned
-    checkban(event.player)
-end
-
-function onPlayerConnect(event)
-    playersOnline[string.lower(event.player:getPlayerName())] = { id=event.player:getPlayerID(), name=event.player:getPlayerName(), ip=event.player:getPlayerIP(), dbid=event.player:getPlayerDBID() }
-    lastlog{action='connect', po=event.player:getPlayerName()}
-    broadcastPlayerStatus(event.player, " is connecting")
-    -- I should be able to set value to event.player, but banning myself is throwing errors so no way to really test :(
-    --- need a second account to really test this stuff.
-end
-
-function onPlayerDisconnect(event)
-    lastlog{action='disconnect', po=event.player:getPlayerName()}
-    -- TODO: compact the table
-    playersOnline[string.lower(event.player:getPlayerName())] = nil
-    broadcastPlayerStatus(event.player, " disconnected")
-end
-
-function onPlayerDeath(event)
-    broadcastPlayerStatus(event.player, " is dead")
-end
-
-function onPlayerText(event)
-    event.prefix = timePrefix{text=decoratePlayerName(event.player)}
-    print(timePrefix{text=event.player:getPlayerName()..": " .. event.text})
-end
-
 function onPlayerCommand(event)
     print(timePrefix{text=event.player:getPlayerName() .. ": "..event.command})
 
@@ -76,7 +39,7 @@ function onPlayerCommand(event)
         if cmd[1] == "/help" then
                 event.player:sendTextMessage("[#00FFCC]/ahelp [#00CC88] Display admin help");
                 event.player:sendTextMessage("[#00FFCC]/zhelp [#00CC88] Display common help");
-                event.player:sendTextMessage("[#00FFCC]/ghelp [#00CC88] Display group management help");
+               -- event.player:sendTextMessage("[#00FFCC]/ghelp [#00CC88] Display group management help");
 
         elseif cmd[1] == "/ahelp" then
             if event.player:isAdmin() then
@@ -85,27 +48,26 @@ function onPlayerCommand(event)
                 event.player:sendTextMessage("[#00FFCC]/setWelcome [#00CC88]<message>");
                 event.player:sendTextMessage("[#00FFCC]/setMotd [#00CC88]<message>");
                 event.player:sendTextMessage("[#00FFCC]/yell [#00CC88]<message>");
-                -- Zcript added functions :
-                event.player:sendTextMessage("[#00FFCC]/kill [#00CC88] <ID>");
-                event.player:sendTextMessage("[#00FFCC]/kill2 [#00CC88]<player>");
-                event.player:sendTextMessage("[#00FFCC]/tp [#00CC88] <ID>");
-                event.player:sendTextMessage("[#00FFCC]/tp2 [#00CC88] <player>");
+                event.player:sendTextMessage("[#00FFCC]/kill [#00CC88] <player ID> OR <player name>");
+                event.player:sendTextMessage("[#00FFCC]/tp [#00CC88] <ID> OR <player name>");
+                event.player:sendTextMessage("[#00FFCC]/tp2 [#00CC88] <ID> OR <player name>");
                 event.player:sendTextMessage("[#00FFCC]/kick [#00CC88] <player ID> <reason>");
+                event.player:sendTextMessage("[#00FFCC]/heal [#00CC88] <player ID or name>");
+
             else
                 event.player:sendTextMessage("[#00FFCC]You're not an admin !");
             end
 
-        elseif cmd[1] == "/ghelp" then
-                event.player:sendTextMessage("[#00FFCC]/gkick [#00CC88] <playerID> OR <player Name> ");
-                event.player:sendTextMessage("[#00FFCC]/gadd [#00CC88] <playerID> OR <player Name> ");
-                event.player:sendTextMessage("[#00FFCC]/g [#00CC88] <message> ");
-                event.player:sendTextMessage("[#00FFCC]/gsetAdmin [#00CC88] <playerID> OR <player Name> ");
+       -- elseif cmd[1] == "/ghelp" then
+       --         event.player:sendTextMessage("[#00FFCC]/gkick [#00CC88] <playerID> OR <player Name> ");
+       --         event.player:sendTextMessage("[#00FFCC]/gadd [#00CC88] <playerID> OR <player Name> ");
+       --         event.player:sendTextMessage("[#00FFCC]/g [#00CC88] <message> ");
+       --         event.player:sendTextMessage("[#00FFCC]/gsetAdmin [#00CC88] <playerID> OR <player Name> ");
 
 
         elseif cmd[1] == "/zhelp" then
             event.player:sendTextMessage("[#00FFCC]/last [#00CC88][player]");
             event.player:sendTextMessage("[#00FFCC]/whisper [#00CC88]<player> <message>");
-            -- Zcript added function
             event.player:sendTextMessage("[#00FFCC]/pos");
 
 
@@ -117,70 +79,129 @@ function onPlayerCommand(event)
             ----------------------------
             --     Group Management   --
             ----------------------------
-        elseif cmd[1] == "/gkick" then
+   --     elseif cmd[1] == "/gkick" then
 
 
-        elseif cmd[1] == "/gadd" then
+    --    elseif cmd[1] == "/gadd" then
 
 
-        elseif cmd[1] == "/g" then
+  --      elseif cmd[1] == "/g" then
 
 
-        elseif cmd[1] == "/gsetAdmin" then    
+  --      elseif cmd[1] == "/gsetAdmin" then    
 
 
             ----------------------------
             --       For Admin        --
             ----------------------------
 
-        elseif cmd[1] == "/kick" then
+
+        elseif cmd[1] == "/test" then
+             event.player:sendTextMessage(event.player:getPlayerID());
+
+
+        elseif cmd[1] == "/heal" then
+            local target;
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
-            -- Checking if there's a player, don't check for reason
+            -- Checking if there's an argument
             if not cmd[2] then return msgInvalidUsage(event.player) end
-            -- Call the kick function
-            local target = server:findPlayerByID(cmd[2]);
+            -- Checking if arg is a player ID OR a player name
+            if tonumber(cmd[2]) == nil then
+                -- here if cmd2's not a number
+                -- Checking if targeted player exist
+                 if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByName(cmd[2]);
+            else
+                -- Checking if targeted player exist
+                if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByID(cmd[2]);
+            end
+            heal(target);
+
+
+        elseif cmd[1] == "/kick" then
+            local target;
+            -- Checking if admin :
+            if not event.player:isAdmin() then return msgAccessDenied(event.player) end
+            -- Checking if there's an argument
+            if not cmd[2] then return msgInvalidUsage(event.player) end
+            -- Checking if arg is a player ID OR a player name
+            if tonumber(cmd[2]) == nil then
+                -- here if cmd2's not a number
+                -- Checking if targeted player exist
+                 if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByName(cmd[2]);
+            else
+                -- Checking if targeted player exist
+                if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByID(cmd[2]);
+            end
             kickPlayer(event.player, target, cmd[3]);
 
 
-        elseif cmd[1] == "/kill2" then
-            -- Checking if admin :
-            if not event.player:isAdmin() then return msgAccessDenied(event.player) end
-            -- Checking if there's an argument
-            if not cmd[2] then return msgInvalidUsage(event.player) end
-            -- Checking if targeted player exist
-            if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
-            local target = server:findPlayerByName(cmd[2]);
-            kill(event.player, target)
 
         elseif cmd[1] == "/kill" then
+            local target;
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
             -- Checking if there's an argument
             if not cmd[2] then return msgInvalidUsage(event.player) end
-            if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
-            local target = server:findPlayerByID(cmd[2]);
+            -- Checking if arg is a player ID OR a player name
+            if tonumber(cmd[2]) == nil then
+                -- here if cmd2's not a number
+                -- Checking if targeted player exist
+                 if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByName(cmd[2]);
+            else
+                -- Checking if targeted player exist
+                if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByID(cmd[2]);
+            end
             kill(event.player, target)
 
+        -- TP admin -> player 
         elseif cmd[1] == "/tp" then
+            local target;
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
             -- Checking if there's an argument
             if not cmd[2] then return msgInvalidUsage(event.player) end
-            -- Checking if targeted player exist
-            if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
-            local target = server:findPlayerByID(cmd[2]);
+            -- Checking if arg is a player ID OR a player name
+            if tonumber(cmd[2]) == nil then
+                -- here if cmd2's not a number
+                -- Checking if targeted player exist
+                 if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByName(cmd[2]);
+            else
+                -- Checking if targeted player exist
+                if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByID(cmd[2]);
+            end
             tp(event.player, target)
+        
 
+        -- TP player -> admin
         elseif cmd[1] == "/tp2" then
+            local target;
             -- Checking if admin :
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
             -- Checking if there's an argument
             if not cmd[2] then return msgInvalidUsage(event.player) end
-            -- Checking if targeted player exist
-            if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
-            local target = server:findPlayerByName(cmd[2]);
-            tp(event.player, target)
+            -- Checking if arg is a player ID OR a player name
+            if tonumber(cmd[2]) == nil then
+                -- here if cmd2's not a number
+                -- Checking if targeted player exist
+                 if not server:findPlayerByName(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByName(cmd[2]);
+            else
+                -- Checking if targeted player exist
+                if not server:findPlayerByID(cmd[2]) then return msgBadID(event.player) end
+                target = server:findPlayerByID(cmd[2]);
+            end
+            tp(target, event.player)
+
+
 
         elseif cmd[1] == "/ban" then
             if not event.player:isAdmin() then return msgAccessDenied(event.player) end
@@ -246,9 +267,6 @@ function onPlayerCommand(event)
         end
     end
 end
-
-
-
             ---------------------------------------------------------------------
             --           Effective command called by previous part             --
             ---------------------------------------------------------------------
@@ -262,6 +280,14 @@ function kickPlayer(kicker, target, reason)
 end
 
 
+-- Suggested by username on official forum ! 
+function heal(target)
+    local tName = target:getPlayerName()
+    target:setPlayerHealth(100);
+    target:setPlayerHunger(100);
+    target:setPlayerThirst(100);
+    target:sendTextMessage("You've been healed !")
+end
 
 
 function sendTableMessage(opts)
@@ -287,6 +313,7 @@ function tp(admin, player)
     -- so I try to add +1.0 to x y and z before calling the function
     admin:setPlayerPosition(newPosx, newPosy, newPosz); 
 end
+
 
 function decoratePlayerName(player)
     local str = "[#CCCCCC]"
@@ -456,6 +483,95 @@ function lastlog(opts)
 end
 
 
+            ---------------------------------------------------------------------
+            --                Group management and DB stuff                    --
+            ---------------------------------------------------------------------
+
+function isInDB(player)
+    local id = player:getPlayerDBID();
+    local name = player:getPlayerName();
+    query = "SELECT name IN player WHERE ID ="..id.." ORDER BY name DESC LIMIT 1;";
+    print(timePrefix{text=query})
+    if name==database:queryupdate(query)
+        then return 1;
+    else
+        return 0;
+    end
+end
+
+function addToDB(player)
+    local id = player:getPlayerDBID();
+    local name = player:getPlayerName();
+    query = "INSERT INTO player (ID, name) VALUES ("..id..","..name..");";
+    print(timePrefix{text=query})
+    database:queryupdate(query)        
+end
+
+function removeFromDB(player)
+    local id = player:getPlayerDBID();
+    local name = player:getPlayerName();
+    query = "DELETE FROM player WHERE ID ="..id.." AND name="..name.." COLLATE NOCASE;"
+    print(timePrefix{text=query})
+    database:queryupdate(query)
+end
+
+
+
+
+
+
+
+
+
+
+
+            ---------------------------------------------------------------------
+            --                         Event Handler                           --
+            ---------------------------------------------------------------------
+
+
+function onPlayerSpawn(event)
+    event.player:addGuiElement(yellLabel)
+    broadcastPlayerStatus(event.player, " joined the world")
+    showWelcome(event.player);
+    -- check for players that were offline when banned
+    checkban(event.player)
+    event.player:sendTextMessage("[#00FFCC]This server is using Zcript ");
+             
+end
+
+function onPlayerConnect(event)
+    playersOnline[string.lower(event.player:getPlayerName())] = { id=event.player:getPlayerID(), name=event.player:getPlayerName(), ip=event.player:getPlayerIP(), dbid=event.player:getPlayerDBID() }
+    lastlog{action='connect', po=event.player:getPlayerName()}
+
+    -- broadcastPlayerStatus(event.player, " is connecting")
+    -- if !(addToDB(event.player)==1)
+    --     then
+    --         addToDB(event.player);
+    -- end   
+
+
+
+end
+
+function onPlayerDisconnect(event)
+    lastlog{action='disconnect', po=event.player:getPlayerName()}
+    -- TODO: compact the table
+    playersOnline[string.lower(event.player:getPlayerName())] = nil
+    broadcastPlayerStatus(event.player, " disconnected")
+end
+
+function onPlayerDeath(event)
+    broadcastPlayerStatus(event.player, " is dead")
+end
+
+function onPlayerText(event)
+    event.prefix = timePrefix{text=decoratePlayerName(event.player)}
+    print(timePrefix{text=event.player:getPlayerName()..": " .. event.text})
+end
+
+
+
 
 
             ---------------------------------------------------------------------
@@ -487,9 +603,9 @@ function onEnable()
 
 
     -- Group management DB entry
-    database:queryupdate("CREATE TABLE IF NOT EXISTS `player` (`ID` INTEGER PRIMARY KEY NOT NULL, `name` VARCHAR NOT NULL, `groupID` INTEGER);");
-    database:queryupdate("CREATE TABLE IF NOT EXISTS `group` (`ID` INTEGER PRIMARY KEY NOT NULL, `name` VARCHAR NOT NULL, `adminID` INTEGER NOT NULL);");
-    database:queryupdate("CREATE TABLE IF NOT EXISTS `groupAdmin` (`ID` INTEGER PRIMARY KEY NOT NULL, `admin1` INTEGER, `admin2` INTEGER, `admin3` INTEGER);");
+    database:queryupdate("CREATE TABLE IF NOT EXISTS player (ID INTEGER PRIMARY KEY NOT NULL, name VARCHAR NOT NULL, groupID INTEGER);");
+    database:queryupdate("CREATE TABLE IF NOT EXISTS group (ID INTEGER PRIMARY KEY NOT NULL, name VARCHAR NOT NULL, adminID INTEGER NOT NULL);");
+    database:queryupdate("CREATE TABLE IF NOT EXISTS groupAdmin (ID INTEGER PRIMARY KEY NOT NULL, admin1 INTEGER, admin2 INTEGER, admin3 INTEGER);");
 
 
     -- Cleanup lost connections (server crash)
