@@ -1,3 +1,8 @@
+THIS VERSION IS NO LONGER COMPATIBLE WITH THE GAME
+THANKS TO CHECK THIS REPO FOR FURTHER UPDATE : https://github.com/RisingWorld/admin-tools
+   
+   
+   
              ____________________________________________________
             /   RISING                                  WORLD    \
            |    _____________________________________________     |
